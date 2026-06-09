@@ -1,6 +1,6 @@
 import sqlite3
 
-DB = "reminders.db"
+DB = "/data/reminders.db"
 
 
 def init_db():
@@ -89,7 +89,7 @@ def get_active_invoices():
 
     cur.execute("""
         SELECT * FROM reminders
-        WHERE status IN ('sent', 'open', 'overdue', 'partially_paid', 'accepted', 'pending')
+        WHERE status IN ('sent', 'open', 'overdue', 'partially_paid', 'pending')
         AND reminder_count < 5
     """)
 

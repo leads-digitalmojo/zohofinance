@@ -106,3 +106,31 @@ def get_contact(contact_id):
         return None
 
     return res.json()
+
+def get_estimate_details(estimate_id):
+    token = get_access_token()
+
+    url = f"{API_URL}/estimates/{estimate_id}"
+
+    headers = {
+        "Authorization": f"Zoho-oauthtoken {token}"
+    }
+
+    params = {
+        "organization_id": ORG_ID
+    }
+
+    res = requests.get(
+        url,
+        headers=headers,
+        params=params,
+        timeout=30
+    )
+
+    print("ESTIMATE DETAILS:", res.status_code)
+
+    if res.status_code != 200:
+        print(res.text)
+        return None
+
+    return res.json()

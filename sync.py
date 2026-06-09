@@ -1,5 +1,10 @@
 import db
-from zoho import get_invoices, get_estimates, get_contact
+from zoho import (
+    get_invoices,
+    get_estimates,
+    get_contact,
+    get_estimate_details
+)
 
 
 def get_phone_numbers(contact_id):
@@ -93,11 +98,21 @@ def sync_invoices():
             amount = est.get("total")
             status = est.get("status")
             estimate_date = est.get("date")
-            estimate_url = est.get("estimate_url", "")
             contact_id = est.get("customer_id")
 
-            phone_1, phone_2 = get_phone_numbers(contact_id)
+            estimate_url = ""
 
+            details = get_estimate_details(estimate_id)
+
+            if details:
+                estimate_url = (
+                    details
+                    .get("estimate", {})
+                    .get("estimate_url", "")
+               )
+
+            phone_1, phone_2 = get_phone_numbers(contact_id)
+ 
             phones_display = phone_1 or "NO NUMBER"
             if phone_2:
                 phones_display += f" + {phone_2}"
@@ -119,7 +134,7 @@ def sync_invoices():
             db.upsert_invoice(record)
 
             # stop reminders if quote is accepted/invoiced/void
-            if status in ("invoiced", "void"):
+            if status in ("invoiced", "void",  "accepted", "declined"):
                 db.mark_paid(f"EST-{estimate_id}")
 
             total += 1

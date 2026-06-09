@@ -19,10 +19,6 @@ def send_whatsapp(to, customer_name, amount, invoice_date, invoice_url="", invoi
     to = clean_number(to)
     print(f"📱 Sending to: {to} | type: {invoice_type}")
 
-    # extract pay now button value
-    invoice_id_part = ""
-    if invoice_url and "CInvoiceID=" in invoice_url:
-        invoice_id_part = invoice_url.split("CInvoiceID=")[-1].strip()
 
     # format date nicely
     try:
@@ -33,9 +29,9 @@ def send_whatsapp(to, customer_name, amount, invoice_date, invoice_url="", invoi
 
     # pick template based on invoice type
     if invoice_type == "quote":
-        template_name = "quote_reminder"
+        template_name = "quote_reminder_v2"
     else:
-        template_name = "tax_invoice_reminder"
+        template_name = "tax_invoice_reminder_v2"
 
     payload = {
         "countryCode": "+91",
@@ -48,14 +44,14 @@ def send_whatsapp(to, customer_name, amount, invoice_date, invoice_url="", invoi
             "bodyValues": [
                 customer_name,
                 str(amount),
-                formatted_date
+                formatted_date,
+                invoice_url
             ]
         }
     }
 
     # only add button if we have a valid URL
-    if invoice_id_part:
-        payload["template"]["buttonValues"] = {"0": [invoice_id_part]}
+    
 
     headers = {
         "Authorization": f"Basic {API_KEY}",
