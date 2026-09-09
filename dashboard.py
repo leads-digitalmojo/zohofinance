@@ -14,10 +14,8 @@ db.init_db()
 
 conn, DictCursor, _ = db._connect()
 if DictCursor:
-    cur = conn.cursor(DictCursor)
+    cur = conn.cursor(cursor_factory=DictCursor)
 else:
-    import sqlite3
-    conn.row_factory = sqlite3.Row
     cur = conn.cursor()
 
 cur.execute("""
