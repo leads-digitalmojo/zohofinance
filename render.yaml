@@ -1,0 +1,66 @@
+databases:
+  - name: zoho-db
+    plan: free
+
+services:
+  - type: web
+    name: zoho-dashboard
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: streamlit run dashboard.py --server.port $PORT --server.address 0.0.0.0
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: zoho-db
+          property: connectionString
+      - key: ZOHO_CLIENT_ID
+        sync: false
+      - key: ZOHO_CLIENT_SECRET
+        sync: false
+      - key: ZOHO_REFRESH_TOKEN
+        sync: false
+      - key: ZOHO_ORG_ID
+        sync: false
+      - key: INTERAKT_API_KEY
+        sync: false
+      - key: INTERAKT_API_URL
+        sync: false
+
+  - type: cron
+    name: zoho-sync
+    runtime: python
+    plan: free
+    schedule: "30 3,8,12 * * *"   # 9am, 2pm, 6pm IST
+    buildCommand: pip install -r requirements.txt
+    startCommand: python3 sync.py
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: zoho-db
+          property: connectionString
+      - key: ZOHO_CLIENT_ID
+        sync: false
+      - key: ZOHO_CLIENT_SECRET
+        sync: false
+      - key: ZOHO_REFRESH_TOKEN
+        sync: false
+      - key: ZOHO_ORG_ID
+        sync: false
+
+  - type: cron
+    name: zoho-reminders
+    runtime: python
+    plan: free
+    schedule: "0 * * * *"          # every hour
+    buildCommand: pip install -r requirements.txt
+    startCommand: python3 -c "import db; db.init_db(); from scheduler import process_reminders; process_reminders()"
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: zoho-db
+          property: connectionString
+      - key: INTERAKT_API_KEY
+        sync: false
+      - key: INTERAKT_API_URL
+        sync: false

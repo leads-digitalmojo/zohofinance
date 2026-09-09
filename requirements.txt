@@ -5,3 +5,4 @@ apscheduler
 streamlit
 pandas
 schedule
+psycopg2-binary
