@@ -30,7 +30,6 @@ services:
   - type: cron
     name: zoho-sync
     runtime: python
-    plan: free
     schedule: "30 3,8,12 * * *"   # 9am, 2pm, 6pm IST
     buildCommand: pip install -r requirements.txt
     startCommand: python3 sync.py
@@ -51,7 +50,6 @@ services:
   - type: cron
     name: zoho-reminders
     runtime: python
-    plan: free
     schedule: "0 * * * *"          # every hour
     buildCommand: pip install -r requirements.txt
     startCommand: python3 -c "import db; db.init_db(); from scheduler import process_reminders; process_reminders()"
