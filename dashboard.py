@@ -1,17 +1,27 @@
 import streamlit as st
-import sqlite3
 import pandas as pd
 import db
+import os
+
+# Inject Streamlit secret into env so db.py picks it up
+if "DATABASE_URL" in st.secrets:
+    os.environ["DATABASE_URL"] = st.secrets["DATABASE_URL"]
 
 st.set_page_config(page_title="Invoice Dashboard", layout="wide")
 st.title("📊 Invoice Reminder Dashboard")
 
 db.init_db()
 
-conn = sqlite3.connect("reminders.db")
+conn, DictCursor, _ = db._connect()
+if DictCursor:
+    cur = conn.cursor(DictCursor)
+else:
+    import sqlite3
+    conn.row_factory = sqlite3.Row
+    cur = conn.cursor()
 
-df = pd.read_sql_query("""
-    SELECT 
+cur.execute("""
+    SELECT
         customer_name,
         amount,
         status,
@@ -21,9 +31,12 @@ df = pd.read_sql_query("""
         sent_at
     FROM reminders
     ORDER BY invoice_date DESC
-""", conn)
+""")
 
+rows = cur.fetchall()
 conn.close()
+
+df = pd.DataFrame([dict(r) for r in rows])
 
 st.subheader("📋 All Invoices")
 
