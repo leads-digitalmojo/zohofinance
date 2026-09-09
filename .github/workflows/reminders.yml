@@ -1,0 +1,26 @@
+name: Send Reminders
+
+on:
+  schedule:
+    - cron: "0 * * * *"   # every hour
+  workflow_dispatch:       # allow manual trigger
+
+jobs:
+  reminders:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run reminder engine
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          INTERAKT_API_KEY: ${{ secrets.INTERAKT_API_KEY }}
+          INTERAKT_API_URL: ${{ secrets.INTERAKT_API_URL }}
+        run: python3 -c "import db; db.init_db(); from scheduler import process_reminders; process_reminders()"
